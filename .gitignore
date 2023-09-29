@@ -20,3 +20,14 @@
 *.css
 *.pyc
 *.xls
+*.ht2
+*.fa 
+*.fa.gz
+*.gtf
+*.bam
+*.bai
+**/.conda
+*.md
+*.png
+*.pdf
+*.db
