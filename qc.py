@@ -17,7 +17,7 @@ def calculate_gc_content(sequence):
 
 # Create a function to process a pair of samples
 def process_sample_pair(sample_path_1, sample_path_2, output_dir):
-    sample_name = os.path.basename(sample_path_1).replace('_1.fastq.gz', '')
+    sample_name = os.path.basename(sample_path_1.split('/')[-1]).replace('_1.fastq.gz', '')
     raw_read_count = 0
     raw_base_count = 0
     clean_read_count = 0
@@ -85,7 +85,8 @@ def process_fastq(input_dir, output_dir):
     for sample_file_1 in tqdm(os.listdir(input_dir)):
         if sample_file_1.endswith('_1.fastq.gz'):
             sample_name_prefix = sample_file_1.replace('_1.fastq.gz', '')
-            sample_file_2 = os.path.join(f"{sample_name_prefix}_2.fastq.gz")
+            sample_file_2 = os.path.join(input_dir, f"{sample_name_prefix}_2.fastq.gz")
+            sample_file_1 = os.path.join(input_dir, sample_file_1)
             os.system(f"trim_galore --cores 64 --trim-n --max_n 15 --paired {sample_file_1} {sample_file_2} -o {output_dir}")
             print(f"Trimming of {sample_name_prefix} is done!")
 
@@ -97,7 +98,6 @@ def process_fastq(input_dir, output_dir):
         sample_file_1 = os.path.join(input_dir, sample_file_1)
         sample_name_prefix = sample_file_1.replace('_1.fastq.gz', '')
         sample_file_2 = os.path.join(f"{sample_name_prefix}_2.fastq.gz")
-        sample_name = os.path.basename(sample_file_1).replace('_1.fastq.gz', '')
         result_dict = process_sample_pair(sample_file_1, sample_file_2, output_dir)
         sample_name_list.append(result_dict[0])
         raw_read_count_list.append(result_dict[1])
@@ -127,10 +127,10 @@ def process_fastq(input_dir, output_dir):
 
 
 # main function
-if __name__ == 'main':
+if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Process FASTQ files and append summary statistics to a CSV file.")
-    parser.add_argument("input_dir", help="Input directory containing Raw FASTQ files.")
-    parser.add_argument("output_dir", help="Output directory for saving clean FASTQ files.")
+    parser.add_argument('-i', "--input_dir", help="Input directory containing Raw FASTQ files.")
+    parser.add_argument('-o', "--output_dir", help="Output directory for saving clean FASTQ files.")
     args = parser.parse_args()
 
     input_dir = args.input_dir

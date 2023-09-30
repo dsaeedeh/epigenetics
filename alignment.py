@@ -8,7 +8,7 @@ from tqdm import tqdm
 def parse_args():
     parser = argparse.ArgumentParser(description='Alignment pipeline')
     parser.add_argument('-i', '--input_dir', required=True, help='Path to QC-result directory')
-    parser.add_argument('-r', '--reference_genome', required=True, help='Path to reference genome.fa file')
+    parser.add_argument('-r', '--reference_genome', required=False, help='Path to reference genome.fa file')
     parser.add_argument('-o', '--output_dir', required=True, help='Path to output directory')
     return parser.parse_args()
 
@@ -18,7 +18,10 @@ def align_fastq(input_dir, output_dir):
         if sample_file_1.endswith('_1_val_1.fq.gz'):
             sample_name_prefix = sample_file_1.replace('_1_val_1.fq.gz', '')
             sample_file_2 = os.path.join(f"{sample_name_prefix}_2_val_2.fq.gz")
-            os.system(f"hisat2 -p 64 -x genome -1 {sample_file_1} -2 {sample_file_2} | samtools view -bSh >{output_dir}/{sample_name_prefix}.bam")
+            sample_file_1 = os.path.join(input_dir, sample_file_1)
+            sample_file_2 = os.path.join(input_dir, sample_file_2)
+            genome = os.path.join(''.join(reference_genome.split('/')[:-1]) + '/genome')
+            os.system(f"hisat2 -p 64 -x {genome} -1 {sample_file_1} -2 {sample_file_2} | samtools view -bSh >{output_dir}/{sample_name_prefix}.bam")
             os.system(f"samtools sort -o {output_dir}/{sample_name_prefix}_sorted.bam {output_dir}/{sample_name_prefix}.bam")
             os.system(f"samtools index {output_dir}/{sample_name_prefix}_sorted.bam")
             print(f"Alignment of {sample_name_prefix} is done!")
@@ -129,7 +132,7 @@ def process_fastq(input_dir):
     print("alignment_results.csv is created!")
 
 
-if __name__ == 'main':
+if __name__ == '__main__':
     args = parse_args()
     input_dir = args.input_dir
     reference_genome = args.reference_genome
@@ -137,9 +140,10 @@ if __name__ == 'main':
 
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
+    print(os.path.join(''.join(reference_genome.split('/')[:-1]) + 'genome.1.ht2'))
 
     # if genome index does not exist, create it
-    if not os.path.exists('genome.1.ht2'):
+    if not os.path.exists(os.path.join(''.join(reference_genome.split('/')[:-1]) + '/genome.1.ht2')):
         print("Creating genome index...")
         os.system(f"hisat2-build {reference_genome} genome")
         print("genome index is created!")
