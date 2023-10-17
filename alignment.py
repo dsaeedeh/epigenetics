@@ -20,7 +20,7 @@ def align_fastq(input_dir, output_dir):
             sample_file_2 = os.path.join(f"{sample_name_prefix}_2_val_2.fq.gz")
             sample_file_1 = os.path.join(input_dir, sample_file_1)
             sample_file_2 = os.path.join(input_dir, sample_file_2)
-            genome = os.path.join(''.join(reference_genome.split('/')[:-1]) + '/genome')
+            genome = '/'.join(reference_genome.split('/')[:-1]) + '/genome'
             os.system(f"hisat2 -p 64 -x {genome} -1 {sample_file_1} -2 {sample_file_2} | samtools view -bSh >{output_dir}/{sample_name_prefix}.bam")
             os.system(f"samtools sort -o {output_dir}/{sample_name_prefix}_sorted.bam {output_dir}/{sample_name_prefix}.bam")
             os.system(f"samtools index {output_dir}/{sample_name_prefix}_sorted.bam")
@@ -140,10 +140,9 @@ if __name__ == '__main__':
 
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
-    print(os.path.join(''.join(reference_genome.split('/')[:-1]) + 'genome.1.ht2'))
 
     # if genome index does not exist, create it
-    if not os.path.exists(os.path.join(''.join(reference_genome.split('/')[:-1]) + '/genome.1.ht2')):
+    if not os.path.exists('/'.join(reference_genome.split('/')[:-1]) + '/genome.1.ht2'):
         print("Creating genome index...")
         os.system(f"hisat2-build {reference_genome} genome")
         print("genome index is created!")
