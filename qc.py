@@ -17,7 +17,7 @@ def calculate_gc_content(sequence):
 
 # Create a function to process a pair of samples
 def process_sample_pair(sample_path_1, sample_path_2, output_dir):
-    sample_name = os.path.basename(sample_path_1.split('/')[-1]).replace('_1.fastq.gz', '')
+    sample_name = os.path.basename(sample_path_1.split('/')[-1]).replace('_1.fq.gz', '')
     raw_read_count = 0
     raw_base_count = 0
     clean_read_count = 0
@@ -33,8 +33,8 @@ def process_sample_pair(sample_path_1, sample_path_2, output_dir):
                 raw_read_count += 1
                 raw_base_count += len(record.seq)
     
-    sample_path_1 = os.path.join(output_dir, sample_name + '_1_val_1.fq.gz')
-    sample_path_2 = os.path.join(output_dir, sample_name + '_2_val_2.fq.gz')
+    sample_path_1 = os.path.join(output_dir, sample_name + '_val_1.fq.gz')
+    sample_path_2 = os.path.join(output_dir, sample_name + '_val_2.fq.gz')
     
     for sample_path in [sample_path_1, sample_path_2]:
         with gzip.open(sample_path, 'rt') as fastq_file:
@@ -83,21 +83,21 @@ def process_fastq(input_dir, output_dir):
     gc_content_percent_list = []
     # run trimgalore for each pair of samples in the input directory and save the results in the output directory
     for sample_file_1 in tqdm(os.listdir(input_dir)):
-        if sample_file_1.endswith('_1.fastq.gz'):
-            sample_name_prefix = sample_file_1.replace('_1.fastq.gz', '')
-            sample_file_2 = os.path.join(input_dir, f"{sample_name_prefix}_2.fastq.gz")
+        if sample_file_1.endswith('_1.fq.gz'):
+            sample_name_prefix = sample_file_1.replace('_1.fq.gz', '')
+            sample_file_2 = os.path.join(input_dir, f"{sample_name_prefix}_2.fq.gz")
             sample_file_1 = os.path.join(input_dir, sample_file_1)
-            os.system(f"trim_galore --cores 64 --trim-n --max_n 15 --paired {sample_file_1} {sample_file_2} -o {output_dir}")
+            os.system(f"trim_galore --cores 112 --trim-n --max_n 15 --paired {sample_file_1} {sample_file_2} -o {output_dir}")
             print(f"Trimming of {sample_name_prefix} is done!")
 
     # Get a list of _1.fastq.gz files in the input directory
-    sample_files_1 = [f for f in os.listdir(input_dir) if f.endswith('_1.fastq.gz')]
+    sample_files_1 = [f for f in os.listdir(input_dir) if f.endswith('_1.fq.gz')]
 
     # Process each pair of samples and append the results to the DataFrame and CSV file
     for sample_file_1 in tqdm(sample_files_1):
         sample_file_1 = os.path.join(input_dir, sample_file_1)
-        sample_name_prefix = sample_file_1.replace('_1.fastq.gz', '')
-        sample_file_2 = os.path.join(f"{sample_name_prefix}_2.fastq.gz")
+        sample_name_prefix = sample_file_1.replace('_1.fq.gz', '')
+        sample_file_2 = os.path.join(f"{sample_name_prefix}_2.fq.gz")
         result_dict = process_sample_pair(sample_file_1, sample_file_2, output_dir)
         sample_name_list.append(result_dict[0])
         raw_read_count_list.append(result_dict[1])
